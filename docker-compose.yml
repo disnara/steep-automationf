@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: steep_automation
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+  
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=steep_automation
+    ports:
+      - "8001:8001"
+    volumes:
+      - /dev/shm:/dev/shm  # Required for Chrome
+  
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongodb_data:
